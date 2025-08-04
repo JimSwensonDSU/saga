@@ -12,3 +12,6 @@ Note output uses Unix style terminal escape sequences.
 
 - [https://andwj.gitlab.io/scott_specs/](https://andwj.gitlab.io/scott_specs/)\
 The Unofficial SAGA Specification v0.9
+
+- [https://www.trs-80.com/wordpress/details/scott-adams/](https://www.trs-80.com/wordpress/details/scott-adams/)\
+TRS-80 Software: Scott Adams Adventures
