@@ -16,6 +16,14 @@ my $SCREEN_WIDTH = 80;
 my $DESCRIPTION_BUFFER;
 my $MESSAGE_BUFFER;
 
+my %ESCAPE =
+(
+   "CLEAR_SCREEN" => "\e[2J",
+   "CLEAR_EOL" => "\e[0J",
+   "CURSOR_HOME" => "\e[H",
+   "CURSOR_LINE_N" => "\e[%d;0H"
+);
+
 # Known flags
 my $FLAG_DARK = 15;
 my $FLAG_LIGHT_OUT = 16;
@@ -79,12 +87,12 @@ my @ITEM_LOCATIONS;
 #
 # Game
 #
-clear_screen();
 
 read_db();
-init_state();
-
 #dump_all();
+
+init_state();
+clear_screen();
 
 while(1)
 {
@@ -164,7 +172,7 @@ sub output_message
    $MESSAGE_BUFFER .= $s;
    my $last_char = substr($MESSAGE_BUFFER,-1);
 
-   #This regex was adding extra newline when line was wrapped on exac boundary
+   #This regex was adding extra newline when line was wrapped on exact boundary
    #my $re = qr/(?=.{${SCREEN_WIDTH},})(.{0,${SCREEN_WIDTH}}\n?)( )/;
    #$MESSAGE_BUFFER =~ s/${re}/\1\2\n/g;
 
@@ -181,12 +189,12 @@ sub output_message
       shift @lines;
    }
 
-   printf("\e[%d;0H", $DESCRIPTION_LINES + 2);
+   printf($ESCAPE{'CURSOR_LINE_N'}, $DESCRIPTION_LINES + 2);
    for (my $i=0; $i<$MESSAGE_LINES-1; $i++)
    {
-      printf("\e[0J%s\n", $lines[$i]);
+      printf($ESCAPE{'CLEAR_EOL'}."%s\n", $lines[$i]);
    }
-   printf("\e[0J%s", $lines[$MESSAGE_LINES-1]);
+   printf($ESCAPE{'CLEAR_EOL'}."%s", $lines[$MESSAGE_LINES-1]);
 
    $MESSAGE_BUFFER = join("\n", @lines);
 
@@ -196,6 +204,11 @@ sub output_message
       $MESSAGE_BUFFER .= "\n";
    }
 
+}
+
+sub clear_message
+{
+   $MESSAGE_BUFFER = '';
 }
 
 sub set_description
@@ -223,10 +236,10 @@ sub output_description
       pop @lines;
    }
 
-   printf("\e[H");
+   printf($ESCAPE{'CURSOR_HOME'});
    for (my $i=0; $i<$DESCRIPTION_LINES; $i++)
    {
-      printf("\e[0J%s\n", $lines[$i]);
+      printf($ESCAPE{'CLEAR_EOL'}."%s\n", $lines[$i]);
    }
 
    printf("<%s>\n", '-'x($SCREEN_WIDTH-1));
@@ -239,7 +252,7 @@ sub clear_description
 
 sub clear_screen
 {
-   printf("\e[2J");
+   printf($ESCAPE{'CLEAR_SCREEN'});
 }
 
 sub init_state
@@ -328,7 +341,6 @@ sub get_input
    output_message("\nTell me what to do ? ");
    my $s = <STDIN>;
    $s =~ s/[\r\n]//d;
-   #output_message("$s\e[1E");
    output_message("$s\n");
 
    if ($s =~ /([^\s]+)\s+([^\s]+)/)
@@ -392,9 +404,17 @@ sub process_input
 {
    my ($verb, $noun) = @_;
 
-   if (verb_actions($verb, $noun))
+   my $action_result = verb_actions($verb, $noun);
+
+   if ($action_result == 1)
    {
-      next;
+      # handled
+      return;
+   }
+   if ($action_result == -1)
+   {
+      output_message("It's beyond my power to do that.\n");
+      return;
    }
    elsif ($verb == $VERB_GO)
    {
@@ -415,7 +435,7 @@ sub process_input
       }
       elsif ($noun < $NOUN_N || $noun > $NOUN_D)
       {
-         output_message("What?\n");
+         output_message("What ?\n");
       }
       elsif ($FLAGS[$FLAG_DARK] && !cond_present($ITEM_LAMP))
       {
@@ -439,14 +459,23 @@ sub process_input
       }
 
       my @getable_items = grep {$ITEM_LOCATIONS[$_] == $LOC_PLAYER && $items[$_]->{'noun'} ne '' && ($s eq 'ALL' || $items[$_]->{'noun'} eq $s)} 0..scalar(@ITEM_LOCATIONS);
+      my @matching_items = grep {$items[$_]->{'noun'} ne '' && $items[$_]->{'noun'} eq $s} 0..scalar(@ITEM_LOCATIONS);
 
       if ($s eq 'ALL' && $FLAGS[$FLAG_DARK] && !cond_present($ITEM_LAMP))
       {
          output_message("It's too dark to see.\n");
       }
+      elsif ($s ne 'ALL' && scalar(@matching_items) == 0)
+      {
+         output_message("What ?\n");
+      }
       elsif ($s ne 'ALL' && scalar(@getable_items) == 0)
       {
          output_message("It's beyond my power to do that.\n");
+      }
+      elsif ($s eq 'ALL' && scalar(@getable_items) == 0)
+      {
+         output_message("Nothing taken.\n");
       }
       else
       {
@@ -458,22 +487,27 @@ sub process_input
 
             if ($s eq 'ALL')
             {
-               output_message(sprintf("   %s: ", $items[$i]->{'desc'}));
+               output_message(sprintf("%s: ", $items[$i]->{'desc'}));
 
                $get_result = verb_actions($VERB_GET, find_noun($items[$i]->{'noun'}));
             }
 
-            if (!$get_result)
+            if ($get_result == 1)
             {
-               if ((grep { $_ == $LOC_CARRIED } @ITEM_LOCATIONS) >= $header{'CARRY_LIMIT'})
-               {
-                  output_message("I've too much to carry!\n");
-               }
-               else
-               {
-                  $ITEM_LOCATIONS[$i] = $LOC_CARRIED;
-                  output_message("OK\n");
-               }
+               # handled
+            }
+            elsif ($get_result == -1)
+            {
+               output_message("It's beyond my power to do that.\n");
+            }
+            elsif ((grep { $_ == $LOC_CARRIED } @ITEM_LOCATIONS) >= $header{'CARRY_LIMIT'})
+            {
+               output_message("I've too much to carry!\n");
+            }
+            else
+            {
+               $ITEM_LOCATIONS[$i] = $LOC_CARRIED;
+               output_message("OK\n");
             }
 
             # If play location changed, we're done with the loop.
@@ -500,10 +534,19 @@ sub process_input
       # however doing that would allow play to drop chigger bites
       # in AdventureLand, etc.
       my @dropable_items = grep {$ITEM_LOCATIONS[$_] == $LOC_CARRIED && $items[$_]->{'noun'} ne '' && ($s eq 'ALL' || $items[$_]->{'noun'} eq $s)} 0..scalar(@ITEM_LOCATIONS);
+      my @matching_items = grep {$items[$_]->{'noun'} ne '' && $items[$_]->{'noun'} eq $s} 0..scalar(@ITEM_LOCATIONS);
 
-      if ($s ne 'ALL' && scalar(@dropable_items) == 0)
+      if ($s ne 'ALL' && scalar(@matching_items) == 0)
+      {
+         output_message("What ?\n");
+      }
+      elsif ($s ne 'ALL' && scalar(@dropable_items) == 0)
       {
          output_message("It's beyond my power to do that.\n");
+      }
+      elsif ($s eq 'ALL' && scalar(@dropable_items) == 0)
+      {
+         output_message("Nothing dropped.\n");
       }
       else
       {
@@ -515,7 +558,7 @@ sub process_input
 
             if ($s eq 'ALL')
             {
-               output_message(sprintf("   %s: ", $items[$i]->{'desc'}));
+               output_message(sprintf("%s: ", $items[$i]->{'desc'}));
 
                if ($items[$i]->{'noun'} ne '')
                {
@@ -523,7 +566,11 @@ sub process_input
                }
             }
 
-            if (!$drop_result)
+            if ($drop_result == 1)
+            {
+               # handled
+            }
+            else
             {
                $ITEM_LOCATIONS[$i] = $LOC_PLAYER;
                output_message("OK\n");
@@ -639,16 +686,24 @@ sub implicit_actions
    }
 }
 
+#
+# Returns:
+#
+#  1 - found and ran a matching action
+#  0 - no matching action
+# -1 - at least 1 matching action but none run (conditions not passed)
+#
 sub verb_actions
 {
    my ($verb, $noun) = @_;
 
+   my $rcode = 0;
+
    if ($verb == $VERB_AUTO)
    {
-      return 0;
+      return $rcode;
    }
 
-   my $any_run = 0;
    foreach my $action (@actions)
    {
       if ($action->{'verb'} != $verb)
@@ -661,14 +716,15 @@ sub verb_actions
          next;
       }
 
+      $rcode = -1;
       if (run_action($action))
       {
-         $any_run = 1;
+         $rcode = 1;
          last;
       }
    }
 
-   return $any_run;
+   return $rcode;
 }
 
 sub continued_actions
@@ -688,6 +744,12 @@ sub continued_actions
    $CONTINUED_ACTION = 0;
 }
 
+#
+# Returns:
+#
+# 1 - conditions passed
+# 0 - conditions not passed
+#
 sub run_action
 {
    my ($action) = @_;
@@ -822,7 +884,7 @@ sub process_opcode
          exit 0;
       }
    }
-   elsif ($opcode == 66)
+   elsif ($opcode == 66) # INVENTORY
    {
       output_message("I'm carrying:\n");
       my @carrying = grep { $ITEM_LOCATIONS[$_] == $LOC_CARRIED } 0..$#ITEM_LOCATIONS;
@@ -851,6 +913,7 @@ sub process_opcode
    }
    elsif ($opcode == 70) # CLEAR
    {
+      clear_message();
       clear_screen();
    }
    elsif ($opcode == 71) # SAVE_GAME
@@ -1294,14 +1357,17 @@ sub read_quoted_str
 #
 # Debugging
 #
+
 sub dump_all
 {
+   %ESCAPE = map { "_".$_ => delete $ESCAPE{$_}; } (keys %ESCAPE);
    dump_actions();
    dump_vocab();
    dump_rooms();
    dump_messages();
    dump_items();
    dump_trailer();
+   %ESCAPE = map { substr($_,1) => delete $ESCAPE{$_}; } (keys %ESCAPE);
 }
 
 sub dump_actions

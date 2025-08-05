@@ -10,6 +10,9 @@ Note output uses Unix style terminal escape sequences.
 
 ## See Also
 
+- [https://msadams.com](https://msadams.com)\
+Scott Adams Grand Adventures home page
+
 - [https://andwj.gitlab.io/scott_specs/](https://andwj.gitlab.io/scott_specs/)\
 The Unofficial SAGA Specification v0.9
 
