@@ -637,6 +637,11 @@ sub find_noun
 {
    my ($s) = @_;
    $s = substr(uc($s),0,$header{'WORD_LENGTH'});
+   if ($s eq '')
+   {
+      return -1;
+   }
+
    for (my $i=0; $i<scalar(@nouns); $i++)
    {
       if ($s eq substr(uc($nouns[$i]),0,$header{'WORD_LENGTH'}))
@@ -652,6 +657,11 @@ sub find_verb
 {
    my ($s) = @_;
    $s = substr(uc($s),0,$header{'WORD_LENGTH'});
+   if ($s eq '')
+   {
+      return -1;
+   }
+
    for (my $i=0; $i<scalar(@verbs); $i++)
    {
       if ($s eq substr(uc($verbs[$i]),0,$header{'WORD_LENGTH'}))
