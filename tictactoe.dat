@@ -691,140 +691,140 @@
 12300
 0
 100
+228
+248
+268
+0
+0
+5013
+0
+100
+288
+308
+328
+0
+0
+5013
+0
+100
+348
+368
+388
+0
+0
+5013
+0
+100
+228
+288
+348
+0
+0
+5013
+0
+100
+248
+308
+368
+0
+0
+5013
+0
+100
+268
+328
+388
+0
+0
+5013
+0
+100
+228
+308
+388
+0
+0
+5013
+0
+100
+268
+308
+348
+0
+0
+5013
+0
+100
+428
+448
+468
+0
+0
+5163
+0
+100
+488
+508
+528
+0
+0
+5163
+0
+100
+548
+568
+588
+0
+0
+5163
+0
+100
+428
+488
+548
+0
+0
+5163
+0
+100
+448
+508
+568
+0
+0
+5163
+0
+100
+468
+528
+588
+0
+0
+5163
+0
+100
+428
+508
+588
+0
+0
+5163
+0
+100
+468
+508
+548
+0
+0
+5163
+0
+100
 199
 0
 0
 0
 0
 5313
-0
-100
-228
-248
-268
-0
-0
-5013
-0
-100
-288
-308
-328
-0
-0
-5013
-0
-100
-348
-368
-388
-0
-0
-5013
-0
-100
-228
-288
-348
-0
-0
-5013
-0
-100
-248
-308
-368
-0
-0
-5013
-0
-100
-268
-328
-388
-0
-0
-5013
-0
-100
-228
-308
-388
-0
-0
-5013
-0
-100
-268
-308
-348
-0
-0
-5013
-0
-100
-428
-448
-468
-0
-0
-5163
-0
-100
-488
-508
-528
-0
-0
-5163
-0
-100
-548
-568
-588
-0
-0
-5163
-0
-100
-428
-488
-548
-0
-0
-5163
-0
-100
-448
-508
-568
-0
-0
-5163
-0
-100
-468
-528
-588
-0
-0
-5163
-0
-100
-428
-508
-588
-0
-0
-5163
-0
-100
-468
-508
-548
-0
-0
-5163
 0
 100
 628
@@ -1258,7 +1258,6 @@ Tie Game
 "Draw board row 3"
 "Draw board row 3"
 "Increment counter"
-"Check Tie game"
 "Check X win row 1"
 "Check X win row 2"
 "Check X win row 3"
@@ -1267,14 +1266,15 @@ Tie Game
 "Check X win col 3"
 "Check X win diag top left bottom right"
 "Check X win diag top right bottom left"
-"Check Y win row 1"
-"Check Y win row 2"
-"Check Y win row 3"
-"Check Y win col 1"
-"Check Y win col 2"
-"Check Y win col 3"
-"Check Y win diag top left bottom right"
-"Check Y win diag top right bottom left"
+"Check O win row 1"
+"Check O win row 2"
+"Check O win row 3"
+"Check O win col 1"
+"Check O win col 2"
+"Check O win col 3"
+"Check O win diag top left bottom right"
+"Check O win diag top right bottom left"
+"Check Tie game"
 "Invalid move"
 "Valid move"
 "Player X turn"
