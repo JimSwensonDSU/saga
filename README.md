@@ -11,6 +11,10 @@ Note output uses Unix style terminal escape sequences.
 - [tictactoe.dat](tictactoe.dat)\
 A two player tic-tac-toe game in Adventure game format.
 
+- [tictactoe_vs_computer.dat](tictactoe_vs_computer.dat)\
+A one player tic-tac-toe game in Adventure game format vs the "computer".
+The computer just moves randomly in this version.
+
 ## See Also
 
 - [https://msadams.com](https://msadams.com)\
