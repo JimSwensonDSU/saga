@@ -6,7 +6,7 @@ Interpreter for Scott Adams games
 
 - [saga.pl](saga.pl)\
 Interpreter written in vanilla Perl.
-Note output uses Unix style terminal escape sequences.
+Note output uses ANSI terminal escape sequences.
 
 - [tictactoe.dat](tictactoe.dat)\
 A two player tic-tac-toe game in Adventure game format.
