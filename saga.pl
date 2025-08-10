@@ -88,6 +88,12 @@ my @ITEM_LOCATIONS;
 # Game
 #
 
+if (scalar(@ARGV)<1 || scalar(@ARGV)>2)
+{
+   printf STDERR "Usage: %s gamefile [savefile]\n", $0;
+   exit 1;
+}
+
 read_db();
 #dump_all();
 
@@ -268,6 +274,37 @@ sub init_state
    {
       push @ITEM_LOCATIONS, $item->{'start_location'};
    }
+
+   if (scalar(@ARGV) < 2)
+   {
+      return;
+   }
+
+   if (!open FILEHANDLE, '<', $ARGV[1])
+   {
+      output_message(sprintf("LOAD ERROR FOR %s: %s\n \n", $ARGV[1], $!));
+      return;
+   }
+
+   my $version = read_int();
+   my $adventure_number = read_int();
+
+   if ($version != $trailer{'VERSION'} || $adventure_number != $trailer{'ADVENTURE_NUMBER'})
+   {
+      output_message(sprintf("LOAD ERROR FOR %s: File does not match this game.\n \n", $ARGV[1]));
+   }
+   else
+   {
+      $LOC_PLAYER = read_int();
+      $LAMP_TIME = read_int();
+      $COUNTER = read_int();
+      $SWAP_ROOM = read_int();
+      @FLAGS = map { read_int(); } 0..$#FLAGS;
+      @SAVED_COUNTERS = map { read_int(); } 0..$#SAVED_COUNTERS;
+      @SAVED_ROOMS = map { read_int(); } 0..$#SAVED_ROOMS;
+      @ITEM_LOCATIONS = map { read_int(); } 0..$#ITEM_LOCATIONS;
+   }
+   close FILEHANDLE;
 }
 
 sub look
@@ -928,7 +965,48 @@ sub process_opcode
    }
    elsif ($opcode == 71) # SAVE_GAME
    {
-      #TODO
+      output_message("Enter save file name: ");
+      my $filename = <STDIN>;
+      $filename =~ s/[\r\n]//d;
+      output_message("$filename\n");
+
+      my $answer = "Y";
+      if (-e "$filename")
+      {
+         $answer = "";
+         while ($answer ne "Y" && $answer ne "N")
+         {
+            output_message(sprintf("Overwrite file %s (Y/N): ", $filename));
+            $answer = <STDIN>;
+            $answer =~ s/[\r\n]//d;
+            output_message("$answer\n");
+            $answer = substr(uc($answer),0,1);
+         }
+      }
+
+      if ($answer eq "N")
+      {
+      }
+      elsif (!open(FH, '>', $filename))
+      {
+         output_message(sprintf("SAVE ERROR FOR %s: %s\n \n", $filename, $!));
+      }
+      else
+      {
+         print FH $trailer{'VERSION'} . "\n";
+         print FH $trailer{'ADVENTURE_NUMBER'} . "\n";
+         print FH $LOC_PLAYER . "\n";
+         print FH $LAMP_TIME . "\n";
+         print FH $COUNTER . "\n";
+         print FH $SWAP_ROOM . "\n";
+         foreach my $flag (@FLAGS) { print FH $flag . "\n"; }
+         foreach my $counter (@SAVED_COUNTERS) { print FH $counter . "\n"; }
+         foreach my $room (@SAVED_ROOMS) { print FH $room . "\n"; }
+         foreach my $item (@ITEM_LOCATIONS) { print FH $item . "\n"; }
+         close(FH);
+
+         output_message(sprintf("Game saved to file %s.\n", $filename));
+      }
    }
    elsif ($opcode == 72) # SWAP
    {
@@ -966,8 +1044,7 @@ sub process_opcode
    }
    elsif ($opcode == 78) # PRINT_COUNTER
    {
-      # TODO
-      output_message(sprintf("%d", $COUNTER));
+      output_message(sprintf("%d ", $COUNTER));
    }
    elsif ($opcode == 79) # SET_COUNTER
    {
