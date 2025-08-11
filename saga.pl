@@ -9,6 +9,9 @@ use strict;
 my @EXITS = ("North", "South", "East", "West", "Up", "Down");
 my %EXITS_INDEX = map { $EXITS[$_] => $_; } 0..$#EXITS;
 
+my $GAMEFILE = "";
+my $SAVEFILE = "";
+
 # Screen
 my $DESCRIPTION_LINES = 10;
 my $MESSAGE_LINES = 13;
@@ -90,12 +93,32 @@ my @ITEM_LOCATIONS;
 
 if (scalar(@ARGV)<1 || scalar(@ARGV)>2)
 {
-   printf STDERR "Usage: %s gamefile [savefile]\n", $0;
-   exit 1;
+   usage();
+}
+
+if ($ARGV[0] eq "-d" && scalar(@ARGV) == 1)
+{
+   usage();
+}
+
+$GAMEFILE = $ARGV[0];
+
+if ($ARGV[0] eq "-d")
+{
+   $GAMEFILE = $ARGV[1];
+}
+elsif (scalar(@ARGV) == 2)
+{
+   $SAVEFILE = $ARGV[1];
 }
 
 read_db();
-#dump_all();
+
+if ($ARGV[0] eq "-d")
+{
+   dump_all();
+   exit 0;
+}
 
 init_state();
 clear_screen();
@@ -117,6 +140,17 @@ exit 0;
 #
 # Game functions
 #
+
+sub usage
+{
+   printf STDERR "Usage: %s [-d] gamefile [savefile]\n", $0;
+   printf STDERR "\n";
+   printf STDERR "      -d - Output a decompiled representation of the gamefile and exit\n";
+   printf STDERR "gamefile - The adventure game data file\n";
+   printf STDERR "savefile - Loads a saved game from the file, typically created via \"SAVE GAME\"\n";
+
+   exit 1;
+}
 
 sub wrap
 {
@@ -275,14 +309,14 @@ sub init_state
       push @ITEM_LOCATIONS, $item->{'start_location'};
    }
 
-   if (scalar(@ARGV) < 2)
+   if ($SAVEFILE eq "")
    {
       return;
    }
 
-   if (!open FILEHANDLE, '<', $ARGV[1])
+   if (!open FILEHANDLE, '<', $SAVEFILE)
    {
-      output_message(sprintf("LOAD ERROR FOR %s: %s\n \n", $ARGV[1], $!));
+      output_message(sprintf("LOAD ERROR FOR %s: %s\n \n", $SAVEFILE, $!));
       return;
    }
 
@@ -291,7 +325,7 @@ sub init_state
 
    if ($version != $trailer{'VERSION'} || $adventure_number != $trailer{'ADVENTURE_NUMBER'})
    {
-      output_message(sprintf("LOAD ERROR FOR %s: File does not match this game.\n \n", $ARGV[1]));
+      output_message(sprintf("LOAD ERROR FOR %s: File does not match this game.\n \n", $SAVEFILE));
    }
    else
    {
@@ -1187,7 +1221,7 @@ sub cond_counter_eq { my ($counter) = @_; $COUNTER == $counter; }
 
 sub read_db
 {
-   open FILEHANDLE, '<', $ARGV[0] or die $!;
+   open FILEHANDLE, '<', $GAMEFILE or die $!;
    read_header();
    read_actions();
    read_vocab();

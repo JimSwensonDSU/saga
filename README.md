@@ -8,8 +8,11 @@ Interpreter for Scott Adams games
 Interpreter written in vanilla Perl.
 Note output uses ANSI terminal escape sequences.\
 \
-Usage: saga.pl gamefile [savefile]\
-where "savefile" is a saved game file, typically created by typing "SAVE GAME" while playing a game.
+Usage: ./saga.pl [-d] gamefile [savefile]\
+\
+      -d - Output a decompiled representation of the gamefile and exit\
+gamefile - The adventure game data file\
+savefile - Loads a saved game from the file, typically created via "SAVE GAME"
 
 - [tictactoe.dat](tictactoe.dat)\
 A two player tic-tac-toe game in Adventure game format.
