@@ -1506,17 +1506,23 @@ sub dump_action
    printf("\n");
    printf("%d: ", $action->{'num'});
 
+   my $comment = "";
+   if ( $action->{'num'} < scalar(@comments) && $comments[$action->{'num'}] ne '')
+   {
+      $comment = " ; " . $comments[$action->{'num'}];
+   }
+
    if ($action->{'verb'} == 0 && $action->{'noun'} == 0)
    {
-      printf("CONTINUED\n");
+      printf("CONTINUED%s\n", $comment);
    }
    elsif ($action->{'verb'} == 0)
    {
-      printf("IMPLICIT %d%%\n", $action->{'noun'});
+      printf("IMPLICIT %d%%%s\n", $action->{'noun'}, $comment);
    }
    else
    {
-      printf("verb %d (%s), noun %d (%s)\n", $action->{'verb'}, $verbs[$action->{'verb'}], $action->{'noun'}, $nouns[$action->{'noun'}]);
+      printf("verb %d (%s), noun %d (%s)%s\n", $action->{'verb'}, $verbs[$action->{'verb'}], $action->{'noun'}, $nouns[$action->{'noun'}], $comment);
    }
 
    if (scalar(@{$action->{'conditions'}}) > 0)
