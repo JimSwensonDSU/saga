@@ -503,6 +503,7 @@ sub process_input
       {
          $LOC_PLAYER = $exits{$EXITS[$noun-1]};
          output_message("OK\n");
+         look($LOC_PLAYER);
       }
       elsif ($noun < $NOUN_N || $noun > $NOUN_D)
       {
