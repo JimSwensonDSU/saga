@@ -21,6 +21,9 @@ A two player tic-tac-toe game in Adventure game format.
 A one player tic-tac-toe game in Adventure game format vs the "computer".
 The computer just moves randomly in this version.
 
+- [Maps](maps)\
+Maps of adventures.  Warning: spoilers
+
 ## See Also
 
 - [https://msadams.com](https://msadams.com)\
