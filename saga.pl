@@ -1722,7 +1722,7 @@ sub dump_items
          printf(" (%s)", $item->{'noun'});
       }
       printf("\n");
-      printf("%s (loc: %d)\n", $item->{'desc'}, $ITEM_LOCATIONS[$i]);
+      printf("%s (loc: %d)\n", $item->{'desc'}, $item->{'start_location'});
       printf("\n");
       $i++;
    }
