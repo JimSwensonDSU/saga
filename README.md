@@ -32,5 +32,5 @@ Scott Adams Grand Adventures home page
 - [https://andwj.gitlab.io/scott_specs/](https://andwj.gitlab.io/scott_specs/)\
 The Unofficial SAGA Specification v0.9
 
-- [https://www.trs-80.com/wordpress/details/scott-adams/](https://www.trs-80.com/wordpress/details/scott-adams/)\
+- [https://www.trs-80.com/sub-details-scott-adams.htm](https://www.trs-80.com/sub-details-scott-adams.htm)\
 TRS-80 Software: Scott Adams Adventures
